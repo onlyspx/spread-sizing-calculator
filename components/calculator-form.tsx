@@ -115,7 +115,7 @@ export function CalculatorForm({ inputs, onChange }: CalculatorFormProps) {
               <input
                 className="number-input"
                 type="number"
-                min={1}
+                min={0}
                 step="1"
                 value={inputs.lossMultiplier}
                 onChange={(event) => onChange("lossMultiplier", Number(event.target.value))}

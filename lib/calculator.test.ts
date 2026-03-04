@@ -92,11 +92,14 @@ describe("calculateDaily", () => {
     expect(result.dailyNetPnl).toBeCloseTo(864, 8);
   });
 
-  it("clamps loss multiplier below 1 to minimum 1", () => {
-    const result = calculateDaily({ ...probabilityInputs, lossMultiplier: 0.2 });
+  it("allows zero and clamps negative loss multiplier to minimum 0", () => {
+    const zeroResult = calculateDaily({ ...probabilityInputs, lossMultiplier: 0 });
+    const negativeResult = calculateDaily({ ...probabilityInputs, lossMultiplier: -2 });
 
-    expect(result.lossDayPnl).toBe(-1_200);
-    expect(result.dailyNetPnl).toBeCloseTo(912, 8);
+    expect(zeroResult.lossDayPnl).toBe(0);
+    expect(zeroResult.dailyNetPnl).toBeCloseTo(960, 8);
+    expect(negativeResult.lossDayPnl).toBe(0);
+    expect(negativeResult.dailyNetPnl).toBeCloseTo(960, 8);
   });
 });
 

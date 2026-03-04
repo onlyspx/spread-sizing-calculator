@@ -7,7 +7,7 @@ export const MIN_DAYS = 1;
 export const MAX_DAYS = 252;
 export const MIN_WIN_RATE_PCT = 0;
 export const MAX_WIN_RATE_PCT = 100;
-export const MIN_LOSS_MULTIPLIER = 1;
+export const MIN_LOSS_MULTIPLIER = 0;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
@@ -41,7 +41,9 @@ export function calculateDaily(rawInputs: CalculatorInputs): DailyMetrics {
 
     const winDayPnl = contracts * targetCredit * CONTRACT_MULTIPLIER;
     const lossDayPnl =
-      contracts === 0 ? 0 : contracts * (-inputs.lossMultiplier * inputs.sellPremium) * CONTRACT_MULTIPLIER;
+      contracts === 0 || inputs.lossMultiplier === 0
+        ? 0
+        : contracts * (-inputs.lossMultiplier * inputs.sellPremium) * CONTRACT_MULTIPLIER;
     const dailyNetPnl = winRate * winDayPnl + lossRate * lossDayPnl;
     const dailyReturnPct =
       inputs.accountBuyingPower > 0 ? (dailyNetPnl / inputs.accountBuyingPower) * 100 : 0;
