@@ -14,12 +14,38 @@ function parseAccountInput(value: string): number {
 }
 
 export function CalculatorForm({ inputs, onChange }: CalculatorFormProps) {
+  const isProbability = inputs.calculationMode === "probability";
+  const lossRatePct = Math.max(0, 100 - inputs.winRatePct);
+  const lossPointsPerContract = inputs.lossMultiplier * inputs.sellPremium;
+  const lossDollarsPerContract = lossPointsPerContract * 100;
+
   return (
     <section className="card" aria-labelledby="inputs-heading">
       <h2 id="inputs-heading" className="card-title">
         Trade Inputs
       </h2>
       <p className="card-subtitle">Tune capital, spread details, and projection horizon.</p>
+
+      <div className="mode-toggle" role="tablist" aria-label="Calculation mode">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={inputs.calculationMode === "probability"}
+          className={`mode-btn ${inputs.calculationMode === "probability" ? "active" : ""}`.trim()}
+          onClick={() => onChange("calculationMode", "probability")}
+        >
+          Probability Mode
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={inputs.calculationMode === "deterministic"}
+          className={`mode-btn ${inputs.calculationMode === "deterministic" ? "active" : ""}`.trim()}
+          onClick={() => onChange("calculationMode", "deterministic")}
+        >
+          Deterministic Mode
+        </button>
+      </div>
 
       <div className="form-grid">
         <label className="form-field">
@@ -58,7 +84,7 @@ export function CalculatorForm({ inputs, onChange }: CalculatorFormProps) {
         </label>
 
         <label className="form-field">
-          <span className="form-label">Close Premium</span>
+          <span className="form-label">Close Premium (target profit capture)</span>
           <input
             className="number-input"
             type="number"
@@ -68,6 +94,44 @@ export function CalculatorForm({ inputs, onChange }: CalculatorFormProps) {
             onChange={(event) => onChange("closePremium", Number(event.target.value))}
           />
         </label>
+
+        {isProbability && (
+          <>
+            <label className="form-field">
+              <span className="form-label">Win Rate %</span>
+              <input
+                className="number-input"
+                type="number"
+                min={0}
+                max={100}
+                step="0.1"
+                value={inputs.winRatePct}
+                onChange={(event) => onChange("winRatePct", Number(event.target.value))}
+              />
+            </label>
+
+            <label className="form-field">
+              <span className="form-label">Loss Multiplier (x sold premium credit)</span>
+              <input
+                className="number-input"
+                type="number"
+                min={1}
+                step="1"
+                value={inputs.lossMultiplier}
+                onChange={(event) => onChange("lossMultiplier", Number(event.target.value))}
+              />
+              <span className="form-help">
+                Example: {inputs.lossMultiplier}x with sell premium {inputs.sellPremium.toFixed(2)} means a loss day
+                uses -{lossPointsPerContract.toFixed(2)} points (-${lossDollarsPerContract.toFixed(2)}) per contract.
+              </span>
+            </label>
+
+            <label className="form-field wide">
+              <span className="form-label">Loss Rate % (auto)</span>
+              <input className="number-input readonly-input" type="text" value={`${lossRatePct.toFixed(2)}%`} readOnly />
+            </label>
+          </>
+        )}
 
         <label className="form-field wide">
           <span className="form-label">Buying Power Usage</span>

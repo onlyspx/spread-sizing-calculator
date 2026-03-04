@@ -16,6 +16,8 @@ const pctFmt = new Intl.NumberFormat("en-US", {
 });
 
 export function CompoundingTable({ rows }: CompoundingTableProps) {
+  const isProbability = rows[0]?.mode === "probability";
+
   return (
     <section className="card" aria-labelledby="table-heading">
       <h2 id="table-heading" className="card-title">
@@ -31,8 +33,10 @@ export function CompoundingTable({ rows }: CompoundingTableProps) {
               <th scope="col">Starting Account</th>
               <th scope="col">Allocated Capital</th>
               <th scope="col">Contracts</th>
-              <th scope="col">Daily P&amp;L</th>
-              <th scope="col">Daily Return</th>
+              {isProbability && <th scope="col">Win-Day P&amp;L (sell-close)</th>}
+              {isProbability && <th scope="col">Loss-Day P&amp;L (-lossMultiplier*sell)</th>}
+              <th scope="col">{isProbability ? "Expected Daily P&L" : "Daily P&L"}</th>
+              <th scope="col">{isProbability ? "Expected Return" : "Daily Return"}</th>
               <th scope="col">Ending Account</th>
             </tr>
           </thead>
@@ -47,6 +51,12 @@ export function CompoundingTable({ rows }: CompoundingTableProps) {
                   <td>{currencyFmt.format(row.startingAccount)}</td>
                   <td>{currencyFmt.format(row.allocatedCapital)}</td>
                   <td>{row.contracts.toLocaleString("en-US")}</td>
+                  {isProbability && (
+                    <td className="data-positive">{currencyFmt.format(row.winDayPnl ?? 0)}</td>
+                  )}
+                  {isProbability && (
+                    <td className="data-negative">{currencyFmt.format(row.lossDayPnl ?? 0)}</td>
+                  )}
                   <td className={pnlClass}>{currencyFmt.format(row.dailyNetPnl)}</td>
                   <td className={returnClass}>{pctFmt.format(row.dailyReturnPct)}%</td>
                   <td>{currencyFmt.format(row.endingAccount)}</td>
