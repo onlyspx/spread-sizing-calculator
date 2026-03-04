@@ -6,6 +6,12 @@ type CalculatorFormProps = {
 };
 
 const BP_PRESETS = [10, 20, 30, 50, 100] as const;
+const accountFmt = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
+
+function parseAccountInput(value: string): number {
+  const cleaned = value.replace(/[^0-9]/g, "");
+  return cleaned.length > 0 ? Number(cleaned) : 0;
+}
 
 export function CalculatorForm({ inputs, onChange }: CalculatorFormProps) {
   return (
@@ -20,11 +26,10 @@ export function CalculatorForm({ inputs, onChange }: CalculatorFormProps) {
           <span className="form-label">Account Buying Power ($)</span>
           <input
             className="number-input"
-            type="number"
-            min={0}
-            step="100"
-            value={inputs.accountBuyingPower}
-            onChange={(event) => onChange("accountBuyingPower", Number(event.target.value))}
+            type="text"
+            inputMode="numeric"
+            value={accountFmt.format(Math.max(0, Math.trunc(inputs.accountBuyingPower)))}
+            onChange={(event) => onChange("accountBuyingPower", parseAccountInput(event.target.value))}
           />
         </label>
 
